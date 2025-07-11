@@ -5,518 +5,331 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Tracker Pro</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css">
+    <link href="https://cdn.lineicons.com/5.0/lineicons.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
+    <!-- Login Page -->
+    <div id="loginPage" class="auth-page">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1><i class="lni lni-users"></i> Team Tracker Pro</h1>
+                <p>Professional team management and task tracking</p>
+            </div>
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginEmail" class="form-label">
+                        <i class="lni lni-envelope"></i> Email
+                    </label>
+                    <input type="email" id="loginEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">
+                        <i class="lni lni-lock"></i> Password
+                    </label>
+                    <input type="password" id="loginPassword" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe"> Remember me
+                    </label>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">
+                    <i class="lni lni-enter"></i> Login
+                </button>
+            </form>
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signupPage" class="auth-page hidden">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1><i class="lni lni-users"></i> Team Tracker Pro</h1>
+                <p>Join your team and start tracking progress</p>
+            </div>
+            <form id="signupForm" class="auth-form">
+                <div class="form-group">
+                    <label for="signupName" class="form-label">
+                        <i class="lni lni-user"></i> Full Name
+                    </label>
+                    <input type="text" id="signupName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail" class="form-label">
+                        <i class="lni lni-envelope"></i> Email
+                    </label>
+                    <input type="email" id="signupEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword" class="form-label">
+                        <i class="lni lni-lock"></i> Password
+                    </label>
+                    <input type="password" id="signupPassword" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupTeam" class="form-label">
+                        <i class="lni lni-network"></i> Team
+                    </label>
+                    <select id="signupTeam" class="form-control" required>
+                        <option value="">Select Team</option>
+                        <option value="TDM">TDM - Test Data Management</option>
+                        <option value="Looker">Looker - Analytics and Visualization</option>
+                        <option value="Production Support">Production Support - Operations</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn--primary btn--full-width">
+                    <i class="lni lni-user-plus"></i> Sign Up
+                </button>
+            </form>
+            <div class="auth-footer">
+                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
         <!-- Navigation -->
         <nav class="navbar">
-            <div class="nav-brand">
+            <div class="navbar-brand">
                 <i class="lni lni-users"></i>
                 <span>Team Tracker Pro</span>
             </div>
-            <div class="nav-actions">
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="lni lni-sun"></i>
-                </button>
-                <div class="user-profile">
-                    <img src="https://via.placeholder.com/32x32/21808d/ffffff?text=A" alt="Admin" class="avatar">
-                    <span>Admin</span>
+            <div class="navbar-nav">
+                <a href="#" class="nav-link active" data-page="dashboard">
+                    <i class="lni lni-dashboard"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link" data-page="tasks">
+                    <i class="lni lni-checkmark-circle"></i> Tasks
+                </a>
+                <a href="#" class="nav-link" data-page="teams">
+                    <i class="lni lni-network"></i> Teams
+                </a>
+                <a href="#" class="nav-link" data-page="retrospectives">
+                    <i class="lni lni-comments"></i> Retrospectives
+                </a>
+                <a href="#" class="nav-link" data-page="settings">
+                    <i class="lni lni-cog"></i> Settings
+                </a>
+            </div>
+            <div class="navbar-user">
+                <div class="user-info">
+                    <img id="userAvatar" class="user-avatar" alt="User Avatar">
+                    <span id="userName"></span>
                 </div>
+                <button id="logoutBtn" class="btn btn--secondary btn--sm">
+                    <i class="lni lni-exit"></i> Logout
+                </button>
             </div>
         </nav>
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <ul class="nav-menu">
-                <li class="nav-item active" data-section="dashboard">
-                    <i class="lni lni-dashboard"></i>
-                    <span>Dashboard</span>
-                </li>
-                <li class="nav-item" data-section="team-members">
-                    <i class="lni lni-users"></i>
-                    <span>Team Members</span>
-                </li>
-                <li class="nav-item" data-section="tasks">
-                    <i class="lni lni-checkmark-circle"></i>
-                    <span>Tasks</span>
-                </li>
-                <li class="nav-item" data-section="retrospectives">
-                    <i class="lni lni-thought"></i>
-                    <span>Retrospectives</span>
-                </li>
-                <li class="nav-item" data-section="jira-integration">
-                    <i class="lni lni-link"></i>
-                    <span>Jira Integration</span>
-                </li>
-                <li class="nav-item" data-section="settings">
-                    <i class="lni lni-cog"></i>
-                    <span>Settings</span>
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Dashboard Section -->
-            <section class="section active" id="dashboard">
-                <div class="section-header">
-                    <h1>Dashboard</h1>
-                    <p>Overview of your team's performance and activities</p>
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page active">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="lni lni-dashboard"></i> Dashboard</h1>
+                    <p>Welcome back! Here's what's happening with your team.</p>
                 </div>
 
-                <!-- KPI Cards -->
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="lni lni-users"></i>
-                        </div>
-                        <div class="kpi-content">
-                            <h3 id="totalMembers">0</h3>
-                            <p>Team Members</p>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="lni lni-checkmark-circle"></i>
-                        </div>
-                        <div class="kpi-content">
-                            <h3 id="totalTasks">0</h3>
-                            <p>Active Tasks</p>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="lni lni-timer"></i>
-                        </div>
-                        <div class="kpi-content">
-                            <h3 id="completedTasks">0</h3>
-                            <p>Completed Tasks</p>
-                        </div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon">
-                            <i class="lni lni-warning"></i>
-                        </div>
-                        <div class="kpi-content">
-                            <h3 id="blockedTasks">0</h3>
-                            <p>Blocked Tasks</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts and Activity -->
                 <div class="dashboard-grid">
-                    <div class="chart-container">
-                        <div class="card">
-                            <div class="card__header">
-                                <h3>Team Distribution</h3>
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="lni lni-checkmark-circle"></i>
                             </div>
-                            <div class="card__body">
-                                <canvas id="teamChart"></canvas>
+                            <div class="kpi-content">
+                                <h3 id="totalTasks">0</h3>
+                                <p>Total Tasks</p>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="lni lni-timer"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3 id="activeTasks">0</h3>
+                                <p>Active Tasks</p>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="lni lni-users"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3 id="teamMembers">0</h3>
+                                <p>Team Members</p>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <i class="lni lni-graph"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3 id="completionRate">0%</h3>
+                                <p>Completion Rate</p>
                             </div>
                         </div>
                     </div>
-                    <div class="activity-container">
-                        <div class="card">
-                            <div class="card__header">
-                                <h3>Recent Activity</h3>
-                            </div>
-                            <div class="card__body">
-                                <div id="recentActivity" class="activity-list">
-                                    <div class="activity-empty">
-                                        <i class="lni lni-information"></i>
-                                        <p>No recent activity</p>
-                                    </div>
-                                </div>
-                            </div>
+
+                    <!-- Activity Feed -->
+                    <div class="activity-section">
+                        <h3><i class="lni lni-pulse"></i> Recent Activity</h3>
+                        <div id="activityFeed" class="activity-feed">
+                            <!-- Activities will be populated here -->
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <!-- Team Members Section -->
-            <section class="section" id="team-members">
-                <div class="section-header">
-                    <h1>Team Members</h1>
-                    <button class="btn btn--primary" id="addMemberBtn">
-                        <i class="lni lni-plus"></i>
-                        Add Member
-                    </button>
-                </div>
-
-                <div class="team-tabs">
-                    <button class="tab-btn active" data-team="all">All Teams</button>
-                    <button class="tab-btn" data-team="TDM">TDM</button>
-                    <button class="tab-btn" data-team="Looker">Looker</button>
-                    <button class="tab-btn" data-team="Production Support">Production Support</button>
-                </div>
-
-                <div class="members-grid" id="membersGrid">
-                    <!-- Members will be populated here -->
-                </div>
-            </section>
-
-            <!-- Tasks Section -->
-            <section class="section" id="tasks">
-                <div class="section-header">
-                    <h1>Tasks</h1>
-                    <button class="btn btn--primary" id="addTaskBtn">
-                        <i class="lni lni-plus"></i>
-                        Add Task
-                    </button>
+        <!-- Tasks Page -->
+        <div id="tasksPage" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="lni lni-checkmark-circle"></i> Tasks</h1>
+                    <div class="page-actions">
+                        <button id="importJiraBtn" class="btn btn--secondary">
+                            <i class="lni lni-cloud-download"></i> Import from Jira
+                        </button>
+                        <button id="addTaskBtn" class="btn btn--primary">
+                            <i class="lni lni-plus"></i> Add Task
+                        </button>
+                    </div>
                 </div>
 
                 <div class="task-filters">
-                    <div class="filter-group">
-                        <select class="form-control" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="Not Started">Not Started</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="In Review">In Review</option>
-                            <option value="Blocked">Blocked</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Reopened">Reopened</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <select class="form-control" id="assigneeFilter">
-                            <option value="">All Assignees</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <input type="text" class="form-control" id="searchTasks" placeholder="Search tasks...">
-                    </div>
+                    <select id="taskTeamFilter" class="form-control">
+                        <option value="">All Teams</option>
+                        <option value="TDM">TDM</option>
+                        <option value="Looker">Looker</option>
+                        <option value="Production Support">Production Support</option>
+                    </select>
+                    <select id="taskStatusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
                 </div>
 
-                <div class="tasks-container" id="tasksContainer">
+                <div id="tasksList" class="tasks-grid">
                     <!-- Tasks will be populated here -->
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <!-- Retrospectives Section -->
-            <section class="section" id="retrospectives">
-                <div class="section-header">
-                    <h1>Retrospectives</h1>
-                    <button class="btn btn--primary" id="addRetrospectiveBtn">
-                        <i class="lni lni-plus"></i>
-                        New Retrospective
+        <!-- Teams Page -->
+        <div id="teamsPage" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="lni lni-network"></i> Teams</h1>
+                    <button id="addMemberBtn" class="btn btn--primary">
+                        <i class="lni lni-user-plus"></i> Add Member
                     </button>
                 </div>
 
-                <div class="retrospectives-container" id="retrospectivesContainer">
-                    <!-- Retrospectives will be populated here -->
+                <div id="teamsGrid" class="teams-grid">
+                    <!-- Teams will be populated here -->
                 </div>
-            </section>
+            </div>
+        </div>
 
-            <!-- Jira Integration Section -->
-            <section class="section" id="jira-integration">
-                <div class="section-header">
-                    <h1>Jira Integration</h1>
-                    <p>Connect your Jira board to import tasks automatically</p>
+        <!-- Retrospectives Page -->
+        <div id="retrospectivesPage" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="lni lni-comments"></i> Retrospectives</h1>
+                    <button id="addRetrospectiveBtn" class="btn btn--primary">
+                        <i class="lni lni-plus"></i> Add Entry
+                    </button>
                 </div>
 
-                <div class="card">
-                    <div class="card__body">
-                        <form id="jiraConfigForm">
-                            <div class="form-group">
-                                <label class="form-label">Jira Base URL</label>
-                                <input type="url" class="form-control" id="jiraBaseUrl" placeholder="https://yourcompany.atlassian.net">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">API Key</label>
-                                <input type="password" class="form-control" id="jiraApiKey" placeholder="Your Jira API key">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Username</label>
-                                <input type="text" class="form-control" id="jiraUsername" placeholder="Your Jira username">
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" class="btn btn--primary">Save Configuration</button>
-                                <button type="button" class="btn btn--secondary" id="testJiraConnection">Test Connection</button>
-                            </div>
-                        </form>
-                        <div id="jiraStatus" class="mt-16"></div>
+                <div class="retrospective-sections">
+                    <div class="retro-section">
+                        <h3><i class="lni lni-thumbs-up"></i> What Went Well</h3>
+                        <div id="whatWentWell" class="retro-items"></div>
+                    </div>
+                    <div class="retro-section">
+                        <h3><i class="lni lni-construction"></i> Areas of Improvement</h3>
+                        <div id="areasOfImprovement" class="retro-items"></div>
+                    </div>
+                    <div class="retro-section">
+                        <h3><i class="lni lni-warning"></i> Team Concerns</h3>
+                        <div id="teamConcerns" class="retro-items"></div>
+                    </div>
+                    <div class="retro-section">
+                        <h3><i class="lni lni-star"></i> Major Features</h3>
+                        <div id="majorFeatures" class="retro-items"></div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="card" id="jiraImportCard" style="display: none;">
-                    <div class="card__header">
-                        <h3>Import Tasks from Jira</h3>
-                    </div>
-                    <div class="card__body">
-                        <div class="form-group">
-                            <label class="form-label">Project Key</label>
-                            <input type="text" class="form-control" id="jiraProjectKey" placeholder="e.g., TDM, LOOK">
-                        </div>
-                        <div class="form-group">
-                            <button type="button" class="btn btn--primary" id="importJiraTasksBtn">
-                                <i class="lni lni-download"></i>
-                                Import Tasks
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Settings Section -->
-            <section class="section" id="settings">
-                <div class="section-header">
-                    <h1>Settings</h1>
-                    <p>Configure your application preferences</p>
+        <!-- Settings Page -->
+        <div id="settingsPage" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1><i class="lni lni-cog"></i> Settings</h1>
                 </div>
 
-                <div class="settings-grid">
+                <div class="settings-sections">
                     <div class="card">
-                        <div class="card__header">
-                            <h3>Email Notifications</h3>
-                        </div>
                         <div class="card__body">
-                            <form id="emailConfigForm">
+                            <h3><i class="lni lni-jira"></i> Jira Integration</h3>
+                            <form id="jiraConfigForm">
                                 <div class="form-group">
-                                    <label class="form-label">
-                                        <input type="checkbox" id="emailEnabled"> Enable Email Notifications
-                                    </label>
+                                    <label for="jiraBaseUrl" class="form-label">Jira Base URL</label>
+                                    <input type="url" id="jiraBaseUrl" class="form-control" 
+                                           placeholder="https://company.atlassian.net">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">SMTP Host</label>
-                                    <input type="text" class="form-control" id="smtpHost" placeholder="smtp.gmail.com">
+                                    <label for="jiraUsername" class="form-label">Username</label>
+                                    <input type="text" id="jiraUsername" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">SMTP Port</label>
-                                    <input type="number" class="form-control" id="smtpPort" value="587">
+                                    <label for="jiraApiKey" class="form-label">API Key</label>
+                                    <input type="password" id="jiraApiKey" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">Username</label>
-                                    <input type="text" class="form-control" id="emailUsername" placeholder="your-email@company.com">
+                                    <label for="jiraBoardId" class="form-label">Board ID</label>
+                                    <input type="text" id="jiraBoardId" class="form-control">
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Password</label>
-                                    <input type="password" class="form-control" id="emailPassword" placeholder="App password">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">From Email</label>
-                                    <input type="email" class="form-control" id="fromEmail" placeholder="noreply@company.com">
-                                </div>
-                                <div class="form-group">
-                                    <button type="submit" class="btn btn--primary">Save Email Settings</button>
-                                    <button type="button" class="btn btn--secondary" id="testEmailBtn">Test Email</button>
-                                </div>
+                                <button type="submit" class="btn btn--primary">
+                                    <i class="lni lni-save"></i> Save Configuration
+                                </button>
+                                <button type="button" id="testJiraBtn" class="btn btn--secondary">
+                                    <i class="lni lni-checkmark"></i> Test Connection
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
     </div>
 
     <!-- Modals -->
-    <div class="modal" id="memberModal">
-        <div class="modal-content">
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
             <div class="modal-header">
-                <h2 id="memberModalTitle">Add Team Member</h2>
-                <button class="modal-close" id="closeMemberModal">
+                <h3 id="modalTitle"></h3>
+                <button id="closeModal" class="btn btn--secondary btn--sm">
                     <i class="lni lni-close"></i>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="memberForm">
-                    <div class="form-group">
-                        <label class="form-label">Name</label>
-                        <input type="text" class="form-control" id="memberName" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" id="memberEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Role</label>
-                        <select class="form-control" id="memberRole" required>
-                            <option value="">Select Role</option>
-                            <option value="Developer">Developer</option>
-                            <option value="Senior Developer">Senior Developer</option>
-                            <option value="Tech Lead">Tech Lead</option>
-                            <option value="Manager">Manager</option>
-                            <option value="Product Manager">Product Manager</option>
-                            <option value="QA Engineer">QA Engineer</option>
-                            <option value="DevOps Engineer">DevOps Engineer</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Team</label>
-                        <select class="form-control" id="memberTeam" required>
-                            <option value="">Select Team</option>
-                            <option value="TDM">TDM</option>
-                            <option value="Looker">Looker</option>
-                            <option value="Production Support">Production Support</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Joined Date</label>
-                        <input type="date" class="form-control" id="memberJoinDate" required>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn--primary">Save Member</button>
-                        <button type="button" class="btn btn--secondary" id="cancelMemberBtn">Cancel</button>
-                    </div>
-                </form>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content will be populated here -->
             </div>
         </div>
     </div>
 
-    <div class="modal" id="taskModal">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2 id="taskModalTitle">Add Task</h2>
-                <button class="modal-close" id="closeTaskModal">
-                    <i class="lni lni-close"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="taskForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Jira ID</label>
-                            <input type="text" class="form-control" id="taskJiraId" placeholder="e.g., TDM-123">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Assignee</label>
-                            <select class="form-control" id="taskAssignee" required>
-                                <option value="">Select Assignee</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="taskDescription" rows="3" required></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Estimation (hours)</label>
-                            <input type="number" class="form-control" id="taskEstimation" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <select class="form-control" id="taskStatus" required>
-                                <option value="Not Started">Not Started</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="In Review">In Review</option>
-                                <option value="Blocked">Blocked</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Reopened">Reopened</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Daily Comments</label>
-                        <textarea class="form-control" id="taskDailyComments" rows="2"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Completion Date</label>
-                            <input type="date" class="form-control" id="taskCompletionDate">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">
-                                <input type="checkbox" id="taskClarificationNeeded"> Clarification Needed
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Blockers</label>
-                        <textarea class="form-control" id="taskBlockers" rows="2"></textarea>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Git Link</label>
-                            <input type="url" class="form-control" id="taskGitLink" placeholder="https://github.com/...">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">OneDrive Link</label>
-                            <input type="url" class="form-control" id="taskOneDriveLink" placeholder="https://company.sharepoint.com/...">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Customer Feedback</label>
-                        <textarea class="form-control" id="taskCustomerFeedback" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Lead Comments</label>
-                        <textarea class="form-control" id="taskLeadComments" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn--primary">Save Task</button>
-                        <button type="button" class="btn btn--secondary" id="cancelTaskBtn">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Notifications -->
+    <div id="notifications" class="notifications"></div>
 
-    <div class="modal" id="retrospectiveModal">
-        <div class="modal-content modal-lg">
-            <div class="modal-header">
-                <h2 id="retrospectiveModalTitle">Add Retrospective</h2>
-                <button class="modal-close" id="closeRetrospectiveModal">
-                    <i class="lni lni-close"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="retrospectiveForm">
-                    <div class="form-group">
-                        <label class="form-label">Period</label>
-                        <input type="text" class="form-control" id="retrospectivePeriod" placeholder="e.g., Q3 2025" required>
-                    </div>
-                    <div class="retro-section">
-                        <h3>What went well?</h3>
-                        <div id="whatWentWellContainer">
-                            <div class="retro-item">
-                                <input type="text" class="form-control" placeholder="Add what went well...">
-                                <button type="button" class="btn-remove">×</button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn--secondary btn--sm" onclick="addRetroItem('whatWentWellContainer')">Add Item</button>
-                    </div>
-                    <div class="retro-section">
-                        <h3>Areas of Improvement</h3>
-                        <div id="areasOfImprovementContainer">
-                            <div class="retro-item">
-                                <input type="text" class="form-control" placeholder="Add area of improvement...">
-                                <button type="button" class="btn-remove">×</button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn--secondary btn--sm" onclick="addRetroItem('areasOfImprovementContainer')">Add Item</button>
-                    </div>
-                    <div class="retro-section">
-                        <h3>Team Concerns</h3>
-                        <div id="teamConcernsContainer">
-                            <div class="retro-item">
-                                <input type="text" class="form-control" placeholder="Add team concern...">
-                                <button type="button" class="btn-remove">×</button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn--secondary btn--sm" onclick="addRetroItem('teamConcernsContainer')">Add Item</button>
-                    </div>
-                    <div class="retro-section">
-                        <h3>Major Features</h3>
-                        <div id="majorFeaturesContainer">
-                            <div class="retro-item">
-                                <input type="text" class="form-control" placeholder="Add major feature...">
-                                <button type="button" class="btn-remove">×</button>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn--secondary btn--sm" onclick="addRetroItem('majorFeaturesContainer')">Add Item</button>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn--primary">Save Retrospective</button>
-                        <button type="button" class="btn btn--secondary" id="cancelRetrospectiveBtn">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
