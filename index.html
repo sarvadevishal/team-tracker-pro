@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Tracking Dashboard - Data Engineering Project Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">Team Tracking Dashboard</h1>
+                <div class="header-actions">
+                    <button class="btn btn--sm btn--outline" id="theme-toggle">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                    <div class="last-updated">
+                        Last updated: <span id="last-updated-time">--</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <div class="nav-container">
+                <ul class="nav-tabs">
+                    <li><button class="nav-tab active" data-tab="dashboard">Dashboard Overview</button></li>
+                    <li><button class="nav-tab" data-tab="tasks">Task Management</button></li>
+                    <li><button class="nav-tab" data-tab="team">Team Performance</button></li>
+                    <li><button class="nav-tab" data-tab="reports">Reports & Analytics</button></li>
+                    <li><button class="nav-tab" data-tab="settings">Settings</button></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Overview Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="container">
+                    <div class="dashboard-grid">
+                        <!-- KPI Cards -->
+                        <div class="kpi-section">
+                            <h2>Key Performance Indicators</h2>
+                            <div class="kpi-cards">
+                                <div class="kpi-card">
+                                    <div class="kpi-value" id="total-tasks">0</div>
+                                    <div class="kpi-label">Total Tasks</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-value" id="completed-tasks">0</div>
+                                    <div class="kpi-label">Completed</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-value" id="in-progress-tasks">0</div>
+                                    <div class="kpi-label">In Progress</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-value" id="blocked-tasks">0</div>
+                                    <div class="kpi-label">Blocked</div>
+                                </div>
+                                <div class="kpi-card">
+                                    <div class="kpi-value" id="overdue-tasks">0</div>
+                                    <div class="kpi-label">Overdue</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Completion Rate -->
+                        <div class="completion-section">
+                            <h3>Project Completion Rate</h3>
+                            <div class="progress-circle">
+                                <div class="progress-value" id="completion-rate">0%</div>
+                            </div>
+                        </div>
+
+                        <!-- Charts -->
+                        <div class="charts-section">
+                            <div class="chart-container">
+                                <h3>Task Status Distribution</h3>
+                                <canvas id="status-chart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>Team Completion Rates</h3>
+                                <canvas id="team-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Alerts -->
+                        <div class="alerts-section">
+                            <h3>Priority Alerts</h3>
+                            <div class="alerts-list" id="alerts-list">
+                                <!-- Alerts will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="activity-section">
+                            <h3>Recent Activity</h3>
+                            <div class="activity-feed" id="activity-feed">
+                                <!-- Activity will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Management Tab -->
+            <div class="tab-content" id="tasks-tab">
+                <div class="container">
+                    <div class="task-header">
+                        <h2>Task Management</h2>
+                        <div class="task-actions">
+                            <button class="btn btn--primary" id="add-task-btn">Add New Task</button>
+                            <button class="btn btn--secondary" id="export-tasks-btn">Export Tasks</button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label>Search:</label>
+                            <input type="text" class="form-control" id="search-tasks" placeholder="Search tasks...">
+                        </div>
+                        <div class="filter-group">
+                            <label>Status:</label>
+                            <select class="form-control" id="filter-status">
+                                <option value="">All Statuses</option>
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Done">Done</option>
+                                <option value="Blocked">Blocked</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Priority:</label>
+                            <select class="form-control" id="filter-priority">
+                                <option value="">All Priorities</option>
+                                <option value="Critical">Critical</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Team:</label>
+                            <select class="form-control" id="filter-team">
+                                <option value="">All Teams</option>
+                                <option value="Data Platform">Data Platform</option>
+                                <option value="AI/ML">AI/ML</option>
+                                <option value="Analytics">Analytics</option>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Quality">Quality</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tasks Table -->
+                    <div class="table-container">
+                        <table class="tasks-table" id="tasks-table">
+                            <thead>
+                                <tr>
+                                    <th>Jira ID</th>
+                                    <th>Description</th>
+                                    <th>Assignee</th>
+                                    <th>Team</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Est. Hours</th>
+                                    <th>Deadline</th>
+                                    <th>Blockers</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasks-tbody">
+                                <!-- Tasks will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Performance Tab -->
+            <div class="tab-content" id="team-tab">
+                <div class="container">
+                    <h2>Team Performance</h2>
+                    <div class="team-grid">
+                        <!-- Team Members Cards -->
+                        <div class="team-members-section">
+                            <h3>Team Members</h3>
+                            <div class="team-cards" id="team-cards">
+                                <!-- Team member cards will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Performance Charts -->
+                        <div class="performance-charts">
+                            <div class="chart-container">
+                                <h3>Team Completion Rates</h3>
+                                <canvas id="team-performance-chart"></canvas>
+                            </div>
+                            <div class="chart-container">
+                                <h3>Blocked Tasks by Team Member</h3>
+                                <canvas id="blocked-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports & Analytics Tab -->
+            <div class="tab-content" id="reports-tab">
+                <div class="container">
+                    <h2>Reports & Analytics</h2>
+                    <div class="reports-grid">
+                        <!-- Report Controls -->
+                        <div class="report-controls">
+                            <h3>Generate Reports</h3>
+                            <div class="form-group">
+                                <label>Report Type:</label>
+                                <select class="form-control" id="report-type">
+                                    <option value="weekly">Weekly Report</option>
+                                    <option value="monthly">Monthly Report</option>
+                                    <option value="retrospective">Retrospective</option>
+                                </select>
+                            </div>
+                            <button class="btn btn--primary" id="generate-report-btn">Generate Report</button>
+                        </div>
+
+                        <!-- Retrospective Section -->
+                        <div class="retrospective-section">
+                            <h3>Latest Retrospective</h3>
+                            <div class="retrospective-content">
+                                <div class="retro-item">
+                                    <h4>What went well:</h4>
+                                    <ul>
+                                        <li>Team collaboration improved significantly</li>
+                                        <li>Data pipeline deployment was successful</li>
+                                        <li>Testing framework implementation completed</li>
+                                    </ul>
+                                </div>
+                                <div class="retro-item">
+                                    <h4>Areas for improvement:</h4>
+                                    <ul>
+                                        <li>Better estimation accuracy needed</li>
+                                        <li>More frequent stakeholder communication</li>
+                                        <li>Reduce technical debt in legacy systems</li>
+                                    </ul>
+                                </div>
+                                <div class="retro-item">
+                                    <h4>Team concerns:</h4>
+                                    <ul>
+                                        <li>Resource allocation for critical tasks</li>
+                                        <li>Dependencies on external APIs</li>
+                                        <li>Timeline pressure for upcoming milestones</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Major Features Timeline -->
+                        <div class="features-timeline">
+                            <h3>Major Features Released</h3>
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-date">Dec 21, 2024</div>
+                                    <div class="timeline-content">Data Pipeline v2.0 - Enhanced performance and reliability</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">Dec 15, 2024</div>
+                                    <div class="timeline-content">ML Model Deployment - Automated training pipeline</div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-date">Dec 10, 2024</div>
+                                    <div class="timeline-content">Analytics Dashboard - Real-time metrics visualization</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab">
+                <div class="container">
+                    <h2>Settings</h2>
+                    <div class="settings-grid">
+                        <!-- Email Notifications -->
+                        <div class="settings-section">
+                            <h3>Email Notifications</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="deadline-notifications" checked>
+                                        Deadline approaching notifications (2 days before)
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="blocked-notifications" checked>
+                                        Blocked task notifications
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="overdue-notifications" checked>
+                                        Overdue task notifications
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="completion-notifications">
+                                        Task completion notifications
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dashboard Settings -->
+                        <div class="settings-section">
+                            <h3>Dashboard Settings</h3>
+                            <div class="settings-form">
+                                <div class="form-group">
+                                    <label>Auto-refresh interval:</label>
+                                    <select class="form-control" id="refresh-interval">
+                                        <option value="30">30 seconds</option>
+                                        <option value="60" selected>1 minute</option>
+                                        <option value="300">5 minutes</option>
+                                        <option value="600">10 minutes</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Default task view:</label>
+                                    <select class="form-control" id="default-view">
+                                        <option value="all">All tasks</option>
+                                        <option value="my-tasks">My tasks only</option>
+                                        <option value="team-tasks">Team tasks only</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Team Management -->
+                        <div class="settings-section">
+                            <h3>Team Management</h3>
+                            <div class="team-list" id="team-list">
+                                <!-- Team members will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Add/Edit Task -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Task</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="task-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jira ID:</label>
+                            <input type="text" class="form-control" id="task-jira-id" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Title:</label>
+                            <input type="text" class="form-control" id="task-title" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <textarea class="form-control" id="task-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Assignee:</label>
+                            <select class="form-control" id="task-assignee" required>
+                                <option value="">Select assignee...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Team:</label>
+                            <select class="form-control" id="task-team" required>
+                                <option value="">Select team...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status:</label>
+                            <select class="form-control" id="task-status" required>
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Done">Done</option>
+                                <option value="Blocked">Blocked</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Priority:</label>
+                            <select class="form-control" id="task-priority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estimation (hours):</label>
+                            <input type="number" class="form-control" id="task-estimation" min="0" step="0.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Estimated Completion:</label>
+                            <input type="date" class="form-control" id="task-completion">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Blocker:</label>
+                        <input type="text" class="form-control" id="task-blocker" placeholder="None">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Comments:</label>
+                        <textarea class="form-control" id="task-comments" rows="2"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Git Link:</label>
+                            <input type="url" class="form-control" id="task-git-link">
+                        </div>
+                        <div class="form-group">
+                            <label>OneDrive Link:</label>
+                            <input type="url" class="form-control" id="task-onedrive-link">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="task-clarification">
+                            Clarification needed
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--secondary" id="modal-cancel">Cancel</button>
+                <button class="btn btn--primary" id="modal-save">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
