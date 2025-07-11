@@ -1,781 +1,1389 @@
-// Application Data and State Management
-class TeamTracker {
+// Team Tracker Pro - Fixed JavaScript Application
+class TeamTrackerApp {
     constructor() {
-        this.tasks = [
-            {"jira_id": "DE-1001", "title": "Feature Development - Alice Task 1", "description": "Complete feature development for project milestone 1", "assignee": "Alice Johnson", "assignee_id": 1, "team": "Data Platform", "status": "In Progress", "priority": "High", "task_type": "Feature Development", "estimation_hours": 24, "actual_hours": null, "start_date": "2024-12-20", "estimated_completion": "2024-12-28", "actual_completion": null, "blocker": "None", "clarification_needed": false, "git_link": "https://github.com/company/project/pull/1", "onedrive_link": "https://company.sharepoint.com/sites/project/documents/task-1", "customer_feedback": "Pending", "is_reopened": false, "daily_comments": "Working on feature development, progress is on track", "lead_comments": "Task 1 - In progress"},
-            {"jira_id": "DE-1002", "title": "Bug Fix - Bob Task 2", "description": "Complete bug fix for project milestone 2", "assignee": "Bob Smith", "assignee_id": 2, "team": "Data Platform", "status": "Blocked", "priority": "Critical", "task_type": "Bug Fix", "estimation_hours": 16, "actual_hours": null, "start_date": "2024-12-21", "estimated_completion": "2024-12-25", "actual_completion": null, "blocker": "Waiting for API", "clarification_needed": true, "git_link": "https://github.com/company/project/pull/2", "onedrive_link": "https://company.sharepoint.com/sites/project/documents/task-2", "customer_feedback": "Negative", "is_reopened": false, "daily_comments": "Working on bug fix, progress is blocked", "lead_comments": "Task 2 - Needs attention"},
-            {"jira_id": "DE-1003", "title": "Data Pipeline - Carol Task 3", "description": "Complete data pipeline for project milestone 3", "assignee": "Carol Davis", "assignee_id": 3, "team": "AI/ML", "status": "Done", "priority": "Medium", "task_type": "Data Pipeline", "estimation_hours": 32, "actual_hours": 30, "start_date": "2024-12-15", "estimated_completion": "2024-12-22", "actual_completion": "2024-12-21", "blocker": "None", "clarification_needed": false, "git_link": "https://github.com/company/project/pull/3", "onedrive_link": "https://company.sharepoint.com/sites/project/documents/task-3", "customer_feedback": "Positive", "is_reopened": false, "daily_comments": "Working on data pipeline, progress is on track", "lead_comments": "Task 3 - Good progress"},
-            {"jira_id": "DE-1004", "title": "Analysis - David Task 4", "description": "Complete analysis for project milestone 4", "assignee": "David Wilson", "assignee_id": 4, "team": "Analytics", "status": "Testing", "priority": "Low", "task_type": "Analysis", "estimation_hours": 20, "actual_hours": 22, "start_date": "2024-12-18", "estimated_completion": "2024-12-26", "actual_completion": null, "blocker": "None", "clarification_needed": false, "git_link": "https://github.com/company/project/pull/4", "onedrive_link": "https://company.sharepoint.com/sites/project/documents/task-4", "customer_feedback": "Neutral", "is_reopened": true, "daily_comments": "Working on analysis, progress is on track", "lead_comments": "Task 4 - In progress"},
-            {"jira_id": "DE-1005", "title": "Testing - Eva Task 5", "description": "Complete testing for project milestone 5", "assignee": "Eva Brown", "assignee_id": 5, "team": "Data Platform", "status": "Not Started", "priority": "Medium", "task_type": "Testing", "estimation_hours": 12, "actual_hours": null, "start_date": "2024-12-25", "estimated_completion": "2024-12-30", "actual_completion": null, "blocker": "Dependencies", "clarification_needed": true, "git_link": "https://github.com/company/project/pull/5", "onedrive_link": "https://company.sharepoint.com/sites/project/documents/task-5", "customer_feedback": "Pending", "is_reopened": false, "daily_comments": "Working on testing, progress is on track", "lead_comments": "Task 5 - In progress"}
-        ];
-
-        this.teamMembers = [
-            {"id": 1, "name": "Alice Johnson", "role": "Senior Data Engineer", "team": "Data Platform", "email": "alice.johnson@company.com"},
-            {"id": 2, "name": "Bob Smith", "role": "Data Engineer", "team": "Data Platform", "email": "bob.smith@company.com"},
-            {"id": 3, "name": "Carol Davis", "role": "ML Engineer", "team": "AI/ML", "email": "carol.davis@company.com"},
-            {"id": 4, "name": "David Wilson", "role": "Analytics Engineer", "team": "Analytics", "email": "david.wilson@company.com"},
-            {"id": 5, "name": "Eva Brown", "role": "Data Architect", "team": "Data Platform", "email": "eva.brown@company.com"},
-            {"id": 6, "name": "Frank Miller", "role": "DevOps Engineer", "team": "Infrastructure", "email": "frank.miller@company.com"},
-            {"id": 7, "name": "Grace Lee", "role": "QA Engineer", "team": "Quality", "email": "grace.lee@company.com"},
-            {"id": 8, "name": "Henry Garcia", "role": "Data Scientist", "team": "AI/ML", "email": "henry.garcia@company.com"}
-        ];
-
-        this.currentEditingTask = null;
-        this.charts = {};
-        this.settings = {
-            theme: 'light',
-            refreshInterval: 60,
-            notifications: {
-                deadline: true,
-                blocked: true,
-                overdue: true,
-                completion: false
+        this.data = {
+            teamMembers: [],
+            tasks: [],
+            retrospectives: [],
+            recentActivity: [],
+            jiraConfig: {
+                baseUrl: '',
+                apiKey: '',
+                username: '',
+                enabled: false
+            },
+            emailConfig: {
+                enabled: false,
+                smtpHost: '',
+                smtpPort: 587,
+                username: '',
+                password: '',
+                fromEmail: ''
             }
         };
-
+        
+        this.currentSection = 'dashboard';
+        this.currentTeamFilter = 'all';
+        this.currentTaskFilters = { status: '', assignee: '', search: '' };
+        this.editingMember = null;
+        this.editingTask = null;
+        this.editingRetrospective = null;
+        
+        this.teams = ['TDM', 'Looker', 'Production Support'];
+        this.roles = ['Developer', 'Senior Developer', 'Tech Lead', 'Manager', 'Product Manager', 'QA Engineer', 'DevOps Engineer'];
+        this.taskStatuses = ['Not Started', 'In Progress', 'In Review', 'Blocked', 'Completed', 'Reopened'];
+        
+        this.teamChart = null;
+        
         this.init();
     }
-
+    
     init() {
-        // Wait for DOM to be ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                this.initializeComponents();
-            });
+        this.loadData();
+        this.setupEventListeners();
+        this.setupTheme();
+        this.renderDashboard();
+        this.renderTeamMembers();
+        this.renderTasks();
+        this.renderRetrospectives();
+        this.loadSettings();
+    }
+    
+    // Data Management
+    loadData() {
+        const saved = localStorage.getItem('teamTrackerData');
+        if (saved) {
+            this.data = { ...this.data, ...JSON.parse(saved) };
         } else {
-            this.initializeComponents();
+            // Load sample data
+            this.data.teamMembers = [
+                {
+                    id: 1,
+                    name: "Sarah Chen",
+                    role: "Tech Lead",
+                    team: "TDM",
+                    joinDate: "2020-03-15",
+                    email: "sarah.chen@company.com"
+                },
+                {
+                    id: 2,
+                    name: "Michael Rodriguez",
+                    role: "Senior Developer",
+                    team: "Looker",
+                    joinDate: "2019-08-22",
+                    email: "michael.rodriguez@company.com"
+                },
+                {
+                    id: 3,
+                    name: "Priya Patel",
+                    role: "Manager",
+                    team: "Production Support",
+                    joinDate: "2018-11-10",
+                    email: "priya.patel@company.com"
+                }
+            ];
+            
+            this.data.tasks = [
+                {
+                    id: 1,
+                    jiraId: "TDM-123",
+                    description: "Implement data validation pipeline",
+                    estimation: 40,
+                    dailyComments: "Working on schema validation logic",
+                    completionDate: "2025-07-20",
+                    blockers: "Waiting for API documentation",
+                    clarificationNeeded: false,
+                    gitLink: "https://github.com/company/project/pull/456",
+                    oneDriveLink: "https://company.sharepoint.com/docs/requirements.pdf",
+                    assignee: "Sarah Chen",
+                    status: "In Progress",
+                    customerFeedback: "High priority for Q3 release",
+                    reopened: false,
+                    leadComments: "Good progress, need to resolve API dependency",
+                    createdDate: "2025-07-05",
+                    updatedDate: "2025-07-11"
+                },
+                {
+                    id: 2,
+                    jiraId: "LOOK-789",
+                    description: "Dashboard performance optimization",
+                    estimation: 24,
+                    dailyComments: "Implemented caching layer, seeing 40% improvement",
+                    completionDate: "2025-07-15",
+                    blockers: "",
+                    clarificationNeeded: false,
+                    gitLink: "https://github.com/company/looker-dashboard/pull/123",
+                    oneDriveLink: "https://company.sharepoint.com/performance-metrics.xlsx",
+                    assignee: "Michael Rodriguez",
+                    status: "Completed",
+                    customerFeedback: "Great improvement in load times",
+                    reopened: false,
+                    leadComments: "Excellent work on optimization",
+                    createdDate: "2025-07-01",
+                    updatedDate: "2025-07-11"
+                }
+            ];
+            
+            // Initialize activity based on existing tasks
+            this.data.recentActivity = this.data.tasks.map(task => ({
+                id: Date.now() + Math.random(),
+                type: 'task_created',
+                title: `Task Created: ${task.jiraId}`,
+                description: task.description,
+                timestamp: new Date(task.createdDate).toISOString(),
+                user: task.assignee || 'System'
+            }));
+            
+            this.saveData();
         }
     }
-
-    initializeComponents() {
-        this.initNavigation();
-        this.initDashboard();
-        this.initTaskManagement();
-        this.initTeamPerformance();
-        this.initReports();
-        this.initSettings();
-        this.initModal();
-        this.initThemeToggle();
-        this.startAutoRefresh();
-        this.updateLastRefresh();
+    
+    saveData() {
+        localStorage.setItem('teamTrackerData', JSON.stringify(this.data));
     }
-
-    // Navigation - Fixed version
-    initNavigation() {
-        const navTabs = document.querySelectorAll('.nav-tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        if (navTabs.length === 0 || tabContents.length === 0) {
-            console.error('Navigation elements not found');
-            return;
-        }
-
-        navTabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
+    
+    // Event Listeners
+    setupEventListeners() {
+        // Navigation - Use preventDefault to stop default behavior
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetTab = tab.dataset.tab;
-                const targetContent = document.getElementById(`${targetTab}-tab`);
-                
-                if (!targetContent) {
-                    console.error(`Tab content not found for: ${targetTab}`);
-                    return;
-                }
-                
-                // Remove active class from all tabs and contents
-                navTabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding content
-                tab.classList.add('active');
-                targetContent.classList.add('active');
-
-                // Update content based on tab
-                if (targetTab === 'dashboard') {
-                    this.updateDashboard();
-                } else if (targetTab === 'tasks') {
-                    this.populateTaskTable();
-                } else if (targetTab === 'team') {
-                    this.updateTeamPerformance();
-                } else if (targetTab === 'reports') {
-                    // Reports tab is ready
-                } else if (targetTab === 'settings') {
-                    // Settings tab is ready
-                }
+                e.stopPropagation();
+                const section = e.currentTarget.dataset.section;
+                this.switchSection(section);
             });
         });
-    }
-
-    // Dashboard
-    initDashboard() {
-        this.updateDashboard();
-        // Delay chart creation to ensure canvas elements are ready
-        setTimeout(() => {
-            this.createCharts();
-        }, 100);
-    }
-
-    updateDashboard() {
-        const kpis = this.calculateKPIs();
         
-        const totalTasksEl = document.getElementById('total-tasks');
-        const completedTasksEl = document.getElementById('completed-tasks');
-        const inProgressTasksEl = document.getElementById('in-progress-tasks');
-        const blockedTasksEl = document.getElementById('blocked-tasks');
-        const overdueTasksEl = document.getElementById('overdue-tasks');
-        const completionRateEl = document.getElementById('completion-rate');
-
-        if (totalTasksEl) totalTasksEl.textContent = kpis.total;
-        if (completedTasksEl) completedTasksEl.textContent = kpis.completed;
-        if (inProgressTasksEl) inProgressTasksEl.textContent = kpis.inProgress;
-        if (blockedTasksEl) blockedTasksEl.textContent = kpis.blocked;
-        if (overdueTasksEl) overdueTasksEl.textContent = kpis.overdue;
-        if (completionRateEl) completionRateEl.textContent = `${kpis.completionRate}%`;
-
-        this.updateAlerts();
-        this.updateActivity();
-    }
-
-    calculateKPIs() {
-        const total = this.tasks.length;
-        const completed = this.tasks.filter(t => t.status === 'Done').length;
-        const inProgress = this.tasks.filter(t => t.status === 'In Progress').length;
-        const blocked = this.tasks.filter(t => t.status === 'Blocked').length;
-        const overdue = this.tasks.filter(t => {
-            if (t.status === 'Done') return false;
-            const deadline = new Date(t.estimated_completion);
-            return deadline < new Date();
-        }).length;
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleTheme();
+            });
+        }
         
-        const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-        return { total, completed, inProgress, blocked, overdue, completionRate };
-    }
-
-    createCharts() {
-        // Status Distribution Chart
-        const statusCtx = document.getElementById('status-chart');
-        if (statusCtx) {
-            const statusData = this.getStatusDistribution();
-            this.charts.status = new Chart(statusCtx.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(statusData),
-                    datasets: [{
-                        data: Object.values(statusData),
-                        backgroundColor: ['#1FB8CD', '#FFC185', '#B4413C', '#5D878F', '#DB4545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
+        // Team member management
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        if (addMemberBtn) {
+            addMemberBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showMemberModal();
             });
         }
-
-        // Team Performance Chart
-        const teamCtx = document.getElementById('team-chart');
-        if (teamCtx) {
-            const teamData = this.getTeamPerformance();
-            this.charts.team = new Chart(teamCtx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: teamData.labels,
-                    datasets: [{
-                        label: 'Completion Rate (%)',
-                        data: teamData.data,
-                        backgroundColor: '#1FB8CD'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    getStatusDistribution() {
-        const distribution = {};
-        this.tasks.forEach(task => {
-            distribution[task.status] = (distribution[task.status] || 0) + 1;
-        });
-        return distribution;
-    }
-
-    getTeamPerformance() {
-        const teams = {};
-        this.tasks.forEach(task => {
-            if (!teams[task.team]) {
-                teams[task.team] = { total: 0, completed: 0 };
-            }
-            teams[task.team].total++;
-            if (task.status === 'Done') {
-                teams[task.team].completed++;
-            }
-        });
-
-        const labels = Object.keys(teams);
-        const data = labels.map(team => {
-            const { total, completed } = teams[team];
-            return total > 0 ? Math.round((completed / total) * 100) : 0;
-        });
-
-        return { labels, data };
-    }
-
-    updateAlerts() {
-        const alertsList = document.getElementById('alerts-list');
-        if (!alertsList) return;
-
-        const alerts = [];
-
-        // Check for blocked tasks
-        const blockedTasks = this.tasks.filter(t => t.status === 'Blocked');
-        blockedTasks.forEach(task => {
-            alerts.push({
-                type: 'blocked',
-                message: `${task.jira_id}: ${task.title} is blocked - ${task.blocker}`
-            });
-        });
-
-        // Check for overdue tasks
-        const overdueTasks = this.tasks.filter(t => {
-            if (t.status === 'Done') return false;
-            const deadline = new Date(t.estimated_completion);
-            return deadline < new Date();
-        });
-        overdueTasks.forEach(task => {
-            alerts.push({
-                type: 'overdue',
-                message: `${task.jira_id}: ${task.title} is overdue (deadline: ${task.estimated_completion})`
-            });
-        });
-
-        alertsList.innerHTML = alerts.length > 0 ? 
-            alerts.map(alert => `
-                <div class="alert-item ${alert.type === 'blocked' ? 'status--blocked' : ''}">
-                    ${alert.message}
-                </div>
-            `).join('') : 
-            '<div class="alert-item">No alerts at this time</div>';
-    }
-
-    updateActivity() {
-        const activityFeed = document.getElementById('activity-feed');
-        if (!activityFeed) return;
-
-        const activities = [
-            'Task DE-1003 completed by Carol Davis',
-            'Task DE-1002 blocked - waiting for API',
-            'New task DE-1005 assigned to Eva Brown',
-            'Task DE-1004 moved to testing phase'
-        ];
-
-        activityFeed.innerHTML = activities.map(activity => `
-            <div class="activity-item">${activity}</div>
-        `).join('');
-    }
-
-    // Task Management
-    initTaskManagement() {
-        // Initialize task filters
-        this.initTaskFilters();
-        this.initTaskActions();
-    }
-
-    populateTaskTable() {
-        const tbody = document.getElementById('tasks-tbody');
-        if (!tbody) return;
-
-        const filteredTasks = this.getFilteredTasks();
-
-        tbody.innerHTML = filteredTasks.map(task => `
-            <tr>
-                <td>${task.jira_id}</td>
-                <td>${task.title}</td>
-                <td>${task.assignee}</td>
-                <td>${task.team}</td>
-                <td><span class="status status--${task.status.toLowerCase().replace(' ', '-')}">${task.status}</span></td>
-                <td><span class="status status--${task.priority.toLowerCase()}">${task.priority}</span></td>
-                <td>${task.estimation_hours}h</td>
-                <td>${task.estimated_completion}</td>
-                <td>${task.blocker !== 'None' ? task.blocker : '-'}</td>
-                <td class="actions">
-                    <button class="btn btn--sm btn--outline" onclick="app.editTask('${task.jira_id}')">Edit</button>
-                    <button class="btn btn--sm btn--secondary" onclick="app.deleteTask('${task.jira_id}')">Delete</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    getFilteredTasks() {
-        let filtered = [...this.tasks];
         
-        const searchTerm = document.getElementById('search-tasks')?.value?.toLowerCase() || '';
-        const statusFilter = document.getElementById('filter-status')?.value || '';
-        const priorityFilter = document.getElementById('filter-priority')?.value || '';
-        const teamFilter = document.getElementById('filter-team')?.value || '';
-
-        if (searchTerm) {
-            filtered = filtered.filter(task => 
-                task.title.toLowerCase().includes(searchTerm) ||
-                task.description.toLowerCase().includes(searchTerm) ||
-                task.jira_id.toLowerCase().includes(searchTerm)
-            );
+        const memberForm = document.getElementById('memberForm');
+        if (memberForm) {
+            memberForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveMember();
+            });
         }
-
-        if (statusFilter) {
-            filtered = filtered.filter(task => task.status === statusFilter);
+        
+        const cancelMemberBtn = document.getElementById('cancelMemberBtn');
+        if (cancelMemberBtn) {
+            cancelMemberBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMemberModal();
+            });
         }
-
-        if (priorityFilter) {
-            filtered = filtered.filter(task => task.priority === priorityFilter);
+        
+        const closeMemberModal = document.getElementById('closeMemberModal');
+        if (closeMemberModal) {
+            closeMemberModal.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMemberModal();
+            });
         }
-
-        if (teamFilter) {
-            filtered = filtered.filter(task => task.team === teamFilter);
-        }
-
-        return filtered;
-    }
-
-    initTaskFilters() {
-        ['search-tasks', 'filter-status', 'filter-priority', 'filter-team'].forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.addEventListener('input', () => this.populateTaskTable());
-            }
-        });
-    }
-
-    initTaskActions() {
-        const addTaskBtn = document.getElementById('add-task-btn');
-        const exportTasksBtn = document.getElementById('export-tasks-btn');
-
+        
+        // Task management
+        const addTaskBtn = document.getElementById('addTaskBtn');
         if (addTaskBtn) {
-            addTaskBtn.addEventListener('click', () => {
-                this.currentEditingTask = null;
+            addTaskBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 this.showTaskModal();
             });
         }
-
-        if (exportTasksBtn) {
-            exportTasksBtn.addEventListener('click', () => {
-                this.exportTasks();
+        
+        const taskForm = document.getElementById('taskForm');
+        if (taskForm) {
+            taskForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveTask();
             });
         }
-    }
-
-    editTask(jiraId) {
-        this.currentEditingTask = this.tasks.find(task => task.jira_id === jiraId);
-        this.showTaskModal();
-    }
-
-    deleteTask(jiraId) {
-        if (confirm('Are you sure you want to delete this task?')) {
-            this.tasks = this.tasks.filter(task => task.jira_id !== jiraId);
-            this.populateTaskTable();
-            this.updateDashboard();
-        }
-    }
-
-    exportTasks() {
-        const csvContent = this.tasksToCSV();
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'tasks_export.csv';
-        a.click();
-        window.URL.revokeObjectURL(url);
-    }
-
-    tasksToCSV() {
-        const headers = ['Jira ID', 'Title', 'Description', 'Assignee', 'Team', 'Status', 'Priority', 'Estimation Hours', 'Deadline'];
-        const rows = this.tasks.map(task => [
-            task.jira_id,
-            task.title,
-            task.description,
-            task.assignee,
-            task.team,
-            task.status,
-            task.priority,
-            task.estimation_hours,
-            task.estimated_completion
-        ]);
         
-        return [headers, ...rows].map(row => row.map(field => `"${field}"`).join(',')).join('\n');
-    }
-
-    // Team Performance
-    initTeamPerformance() {
-        // Team performance will be updated when tab is clicked
-    }
-
-    updateTeamPerformance() {
-        this.populateTeamCards();
-        setTimeout(() => {
-            this.createTeamCharts();
-        }, 100);
-    }
-
-    populateTeamCards() {
-        const teamCards = document.getElementById('team-cards');
-        if (!teamCards) return;
-
-        const teamStats = this.getTeamMemberStats();
-
-        teamCards.innerHTML = teamStats.map(member => `
-            <div class="team-card">
-                <h4>${member.name}</h4>
-                <div class="card-stats">
-                    <span>Role: ${member.role}</span>
-                    <span>Team: ${member.team}</span>
-                </div>
-                <div class="card-stats">
-                    <span>Tasks: ${member.totalTasks}</span>
-                    <span>Completed: ${member.completedTasks}</span>
-                    <span>Blocked: ${member.blockedTasks}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    getTeamMemberStats() {
-        return this.teamMembers.map(member => {
-            const memberTasks = this.tasks.filter(task => task.assignee === member.name);
-            return {
-                ...member,
-                totalTasks: memberTasks.length,
-                completedTasks: memberTasks.filter(task => task.status === 'Done').length,
-                blockedTasks: memberTasks.filter(task => task.status === 'Blocked').length
-            };
+        const cancelTaskBtn = document.getElementById('cancelTaskBtn');
+        if (cancelTaskBtn) {
+            cancelTaskBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeTaskModal();
+            });
+        }
+        
+        const closeTaskModal = document.getElementById('closeTaskModal');
+        if (closeTaskModal) {
+            closeTaskModal.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeTaskModal();
+            });
+        }
+        
+        // Task filters
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                e.stopPropagation();
+                this.currentTaskFilters.status = e.target.value;
+                this.renderTasks();
+            });
+        }
+        
+        const assigneeFilter = document.getElementById('assigneeFilter');
+        if (assigneeFilter) {
+            assigneeFilter.addEventListener('change', (e) => {
+                e.stopPropagation();
+                this.currentTaskFilters.assignee = e.target.value;
+                this.renderTasks();
+            });
+        }
+        
+        const searchTasks = document.getElementById('searchTasks');
+        if (searchTasks) {
+            searchTasks.addEventListener('input', (e) => {
+                e.stopPropagation();
+                this.currentTaskFilters.search = e.target.value;
+                this.renderTasks();
+            });
+        }
+        
+        // Team tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.currentTeamFilter = e.target.dataset.team;
+                this.updateTeamTabs();
+                this.renderTeamMembers();
+            });
+        });
+        
+        // Retrospectives
+        const addRetrospectiveBtn = document.getElementById('addRetrospectiveBtn');
+        if (addRetrospectiveBtn) {
+            addRetrospectiveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.showRetrospectiveModal();
+            });
+        }
+        
+        const retrospectiveForm = document.getElementById('retrospectiveForm');
+        if (retrospectiveForm) {
+            retrospectiveForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveRetrospective();
+            });
+        }
+        
+        const cancelRetrospectiveBtn = document.getElementById('cancelRetrospectiveBtn');
+        if (cancelRetrospectiveBtn) {
+            cancelRetrospectiveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeRetrospectiveModal();
+            });
+        }
+        
+        const closeRetrospectiveModal = document.getElementById('closeRetrospectiveModal');
+        if (closeRetrospectiveModal) {
+            closeRetrospectiveModal.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeRetrospectiveModal();
+            });
+        }
+        
+        // Jira integration
+        const jiraConfigForm = document.getElementById('jiraConfigForm');
+        if (jiraConfigForm) {
+            jiraConfigForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveJiraConfig();
+            });
+        }
+        
+        const testJiraConnection = document.getElementById('testJiraConnection');
+        if (testJiraConnection) {
+            testJiraConnection.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.testJiraConnection();
+            });
+        }
+        
+        const importJiraTasksBtn = document.getElementById('importJiraTasksBtn');
+        if (importJiraTasksBtn) {
+            importJiraTasksBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.importJiraTasks();
+            });
+        }
+        
+        // Email settings
+        const emailConfigForm = document.getElementById('emailConfigForm');
+        if (emailConfigForm) {
+            emailConfigForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveEmailConfig();
+            });
+        }
+        
+        const testEmailBtn = document.getElementById('testEmailBtn');
+        if (testEmailBtn) {
+            testEmailBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.testEmail();
+            });
+        }
+        
+        // Modal close on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.closeAllModals();
+            }
         });
     }
-
-    createTeamCharts() {
-        // Team Performance Chart
-        const teamCtx = document.getElementById('team-performance-chart');
-        if (teamCtx) {
-            if (this.charts.teamPerformance) {
-                this.charts.teamPerformance.destroy();
-            }
-            const teamData = this.getTeamPerformance();
-            this.charts.teamPerformance = new Chart(teamCtx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: teamData.labels,
-                    datasets: [{
-                        label: 'Completion Rate (%)',
-                        data: teamData.data,
-                        backgroundColor: '#1FB8CD'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
+    
+    // Theme Management
+    setupTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-color-scheme', savedTheme);
+        this.updateThemeIcon(savedTheme);
+    }
+    
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-color-scheme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-color-scheme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        this.updateThemeIcon(newTheme);
+    }
+    
+    updateThemeIcon(theme) {
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = theme === 'light' ? 'lni lni-moon' : 'lni lni-sun';
+        }
+    }
+    
+    // Navigation
+    switchSection(section) {
+        // Update nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        const navItem = document.querySelector(`[data-section="${section}"]`);
+        if (navItem) {
+            navItem.classList.add('active');
+        }
+        
+        // Update sections
+        document.querySelectorAll('.section').forEach(sec => {
+            sec.classList.remove('active');
+        });
+        const sectionElement = document.getElementById(section);
+        if (sectionElement) {
+            sectionElement.classList.add('active');
+        }
+        
+        this.currentSection = section;
+        
+        // Render section-specific content
+        switch(section) {
+            case 'dashboard':
+                this.renderDashboard();
+                break;
+            case 'team-members':
+                this.renderTeamMembers();
+                break;
+            case 'tasks':
+                this.renderTasks();
+                break;
+            case 'retrospectives':
+                this.renderRetrospectives();
+                break;
+            case 'jira-integration':
+                this.loadSettings();
+                break;
+            case 'settings':
+                this.loadSettings();
+                break;
+        }
+    }
+    
+    // Dashboard
+    renderDashboard() {
+        this.updateKPIs();
+        this.renderTeamChart();
+        this.renderRecentActivity();
+    }
+    
+    updateKPIs() {
+        const totalMembers = this.data.teamMembers.length;
+        const totalTasks = this.data.tasks.filter(t => t.status !== 'Completed').length;
+        const completedTasks = this.data.tasks.filter(t => t.status === 'Completed').length;
+        const blockedTasks = this.data.tasks.filter(t => t.status === 'Blocked').length;
+        
+        const totalMembersEl = document.getElementById('totalMembers');
+        const totalTasksEl = document.getElementById('totalTasks');
+        const completedTasksEl = document.getElementById('completedTasks');
+        const blockedTasksEl = document.getElementById('blockedTasks');
+        
+        if (totalMembersEl) totalMembersEl.textContent = totalMembers;
+        if (totalTasksEl) totalTasksEl.textContent = totalTasks;
+        if (completedTasksEl) completedTasksEl.textContent = completedTasks;
+        if (blockedTasksEl) blockedTasksEl.textContent = blockedTasks;
+    }
+    
+    renderTeamChart() {
+        const ctx = document.getElementById('teamChart');
+        if (!ctx) return;
+        
+        const teamCounts = this.teams.map(team => 
+            this.data.teamMembers.filter(member => member.team === team).length
+        );
+        
+        if (this.teamChart) {
+            this.teamChart.destroy();
+        }
+        
+        this.teamChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: this.teams,
+                datasets: [{
+                    data: teamCounts,
+                    backgroundColor: ['#1FB8CD', '#FFC185', '#B4413C'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
                         }
                     }
                 }
-            });
-        }
-
-        // Blocked Tasks Chart
-        const blockedCtx = document.getElementById('blocked-chart');
-        if (blockedCtx) {
-            if (this.charts.blocked) {
-                this.charts.blocked.destroy();
             }
-            const blockedData = this.getBlockedTasksData();
-            this.charts.blocked = new Chart(blockedCtx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: blockedData.labels,
-                    datasets: [{
-                        label: 'Blocked Tasks',
-                        data: blockedData.data,
-                        backgroundColor: '#DB4545'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    getBlockedTasksData() {
-        const blockedByMember = {};
-        this.tasks.filter(task => task.status === 'Blocked').forEach(task => {
-            blockedByMember[task.assignee] = (blockedByMember[task.assignee] || 0) + 1;
         });
-
-        return {
-            labels: Object.keys(blockedByMember),
-            data: Object.values(blockedByMember)
-        };
     }
-
-    // Reports
-    initReports() {
-        const generateReportBtn = document.getElementById('generate-report-btn');
-        if (generateReportBtn) {
-            generateReportBtn.addEventListener('click', () => {
-                this.generateReport();
-            });
-        }
-    }
-
-    generateReport() {
-        const reportType = document.getElementById('report-type')?.value || 'weekly';
-        alert(`Generating ${reportType} report... (This is a simulation)`);
-    }
-
-    // Settings
-    initSettings() {
-        this.populateTeamList();
-        this.initSettingsHandlers();
-    }
-
-    populateTeamList() {
-        const teamList = document.getElementById('team-list');
-        if (!teamList) return;
-
-        teamList.innerHTML = this.teamMembers.map(member => `
-            <div class="team-card">
-                <h4>${member.name}</h4>
-                <div class="card-stats">
-                    <span>${member.role}</span>
-                    <span>${member.team}</span>
-                    <span>${member.email}</span>
+    
+    renderRecentActivity() {
+        const container = document.getElementById('recentActivity');
+        if (!container) return;
+        
+        if (this.data.recentActivity.length === 0) {
+            container.innerHTML = `
+                <div class="activity-empty">
+                    <i class="lni lni-information"></i>
+                    <p>No recent activity</p>
                 </div>
-            </div>
-        `).join('');
-    }
-
-    initSettingsHandlers() {
-        // Notification settings
-        ['deadline-notifications', 'blocked-notifications', 'overdue-notifications', 'completion-notifications'].forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.addEventListener('change', () => {
-                    this.updateNotificationSettings();
-                });
-            }
-        });
-
-        // Dashboard settings
-        const refreshInterval = document.getElementById('refresh-interval');
-        if (refreshInterval) {
-            refreshInterval.addEventListener('change', (e) => {
-                this.settings.refreshInterval = parseInt(e.target.value);
-                this.startAutoRefresh();
-            });
-        }
-    }
-
-    updateNotificationSettings() {
-        this.settings.notifications = {
-            deadline: document.getElementById('deadline-notifications')?.checked || false,
-            blocked: document.getElementById('blocked-notifications')?.checked || false,
-            overdue: document.getElementById('overdue-notifications')?.checked || false,
-            completion: document.getElementById('completion-notifications')?.checked || false
-        };
-    }
-
-    // Modal
-    initModal() {
-        const modal = document.getElementById('task-modal');
-        const closeBtn = document.getElementById('modal-close');
-        const cancelBtn = document.getElementById('modal-cancel');
-        const saveBtn = document.getElementById('modal-save');
-
-        if (closeBtn) closeBtn.addEventListener('click', () => this.hideTaskModal());
-        if (cancelBtn) cancelBtn.addEventListener('click', () => this.hideTaskModal());
-        if (saveBtn) saveBtn.addEventListener('click', () => this.saveTask());
-
-        // Populate assignee and team dropdowns
-        this.populateModalDropdowns();
-    }
-
-    populateModalDropdowns() {
-        const assigneeSelect = document.getElementById('task-assignee');
-        const teamSelect = document.getElementById('task-team');
-
-        if (assigneeSelect) {
-            assigneeSelect.innerHTML = '<option value="">Select assignee...</option>' +
-                this.teamMembers.map(member => `<option value="${member.name}">${member.name}</option>`).join('');
-        }
-
-        if (teamSelect) {
-            const teams = [...new Set(this.teamMembers.map(member => member.team))];
-            teamSelect.innerHTML = '<option value="">Select team...</option>' +
-                teams.map(team => `<option value="${team}">${team}</option>`).join('');
-        }
-    }
-
-    showTaskModal() {
-        const modal = document.getElementById('task-modal');
-        const title = document.getElementById('modal-title');
-        
-        if (!modal) return;
-
-        if (this.currentEditingTask) {
-            if (title) title.textContent = 'Edit Task';
-            this.populateTaskForm(this.currentEditingTask);
-        } else {
-            if (title) title.textContent = 'Add New Task';
-            this.clearTaskForm();
-        }
-        
-        modal.classList.add('show');
-    }
-
-    hideTaskModal() {
-        const modal = document.getElementById('task-modal');
-        if (modal) modal.classList.remove('show');
-        this.currentEditingTask = null;
-    }
-
-    populateTaskForm(task) {
-        const fields = {
-            'task-jira-id': task.jira_id,
-            'task-title': task.title,
-            'task-description': task.description,
-            'task-assignee': task.assignee,
-            'task-team': task.team,
-            'task-status': task.status,
-            'task-priority': task.priority,
-            'task-estimation': task.estimation_hours,
-            'task-completion': task.estimated_completion,
-            'task-blocker': task.blocker !== 'None' ? task.blocker : '',
-            'task-comments': task.daily_comments,
-            'task-git-link': task.git_link,
-            'task-onedrive-link': task.onedrive_link
-        };
-
-        Object.entries(fields).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) element.value = value;
-        });
-
-        const clarificationEl = document.getElementById('task-clarification');
-        if (clarificationEl) clarificationEl.checked = task.clarification_needed;
-    }
-
-    clearTaskForm() {
-        const form = document.getElementById('task-form');
-        if (form) form.reset();
-    }
-
-    saveTask() {
-        const form = document.getElementById('task-form');
-        if (!form || !form.checkValidity()) {
-            if (form) form.reportValidity();
+            `;
             return;
         }
-
-        const taskData = {
-            jira_id: document.getElementById('task-jira-id')?.value || '',
-            title: document.getElementById('task-title')?.value || '',
-            description: document.getElementById('task-description')?.value || '',
-            assignee: document.getElementById('task-assignee')?.value || '',
-            team: document.getElementById('task-team')?.value || '',
-            status: document.getElementById('task-status')?.value || 'Not Started',
-            priority: document.getElementById('task-priority')?.value || 'Medium',
-            estimation_hours: parseInt(document.getElementById('task-estimation')?.value || '0'),
-            estimated_completion: document.getElementById('task-completion')?.value || '',
-            blocker: document.getElementById('task-blocker')?.value || 'None',
-            daily_comments: document.getElementById('task-comments')?.value || '',
-            git_link: document.getElementById('task-git-link')?.value || '',
-            onedrive_link: document.getElementById('task-onedrive-link')?.value || '',
-            clarification_needed: document.getElementById('task-clarification')?.checked || false,
-            assignee_id: this.teamMembers.find(m => m.name === document.getElementById('task-assignee')?.value)?.id || 0,
-            task_type: 'General',
-            actual_hours: null,
-            start_date: new Date().toISOString().split('T')[0],
-            actual_completion: null,
-            customer_feedback: 'Pending',
-            is_reopened: false,
-            lead_comments: ''
+        
+        const sortedActivity = this.data.recentActivity
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, 10);
+        
+        container.innerHTML = sortedActivity.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="lni lni-${this.getActivityIcon(activity.type)}"></i>
+                </div>
+                <div class="activity-content">
+                    <h4>${activity.title}</h4>
+                    <p>${activity.description}</p>
+                </div>
+                <div class="activity-time">
+                    ${this.formatRelativeTime(activity.timestamp)}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    getActivityIcon(type) {
+        const icons = {
+            'task_created': 'plus',
+            'task_updated': 'pencil',
+            'task_completed': 'checkmark',
+            'member_added': 'user',
+            'member_removed': 'user-unfollow',
+            'retrospective_added': 'thought',
+            'jira_import': 'download'
         };
-
-        if (this.currentEditingTask) {
-            const index = this.tasks.findIndex(t => t.jira_id === this.currentEditingTask.jira_id);
-            if (index !== -1) {
-                this.tasks[index] = { ...this.currentEditingTask, ...taskData };
-            }
+        return icons[type] || 'information';
+    }
+    
+    formatRelativeTime(timestamp) {
+        const now = new Date();
+        const time = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - time) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    }
+    
+    // Team Members
+    renderTeamMembers() {
+        const container = document.getElementById('membersGrid');
+        if (!container) return;
+        
+        let filteredMembers = this.data.teamMembers;
+        
+        if (this.currentTeamFilter !== 'all') {
+            filteredMembers = filteredMembers.filter(member => member.team === this.currentTeamFilter);
+        }
+        
+        if (filteredMembers.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                    <i class="lni lni-users" style="font-size: 3rem; color: var(--color-text-secondary); margin-bottom: 1rem;"></i>
+                    <h3>No team members found</h3>
+                    <p>Add your first team member to get started</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = filteredMembers.map(member => `
+            <div class="member-card" data-team="${member.team}">
+                <div class="member-header">
+                    <div class="member-avatar">
+                        ${member.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div class="member-info">
+                        <h3>${member.name}</h3>
+                        <p>${member.role}</p>
+                    </div>
+                </div>
+                <div class="member-details">
+                    <div class="member-detail">
+                        <label>Team</label>
+                        <span class="team-${member.team.toLowerCase().replace(' ', '-')}">${member.team}</span>
+                    </div>
+                    <div class="member-detail">
+                        <label>Experience</label>
+                        <span>${this.calculateExperience(member.joinDate)} years</span>
+                    </div>
+                    <div class="member-detail">
+                        <label>Email</label>
+                        <span>${member.email}</span>
+                    </div>
+                    <div class="member-detail">
+                        <label>Joined</label>
+                        <span>${this.formatDate(member.joinDate)}</span>
+                    </div>
+                </div>
+                <div class="member-actions">
+                    <button class="btn-icon btn-icon--edit" onclick="app.editMember(${member.id})" title="Edit Member">
+                        <i class="lni lni-pencil"></i>
+                    </button>
+                    <button class="btn-icon btn-icon--delete" onclick="app.deleteMember(${member.id})" title="Delete Member">
+                        <i class="lni lni-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        this.updateAssigneeFilters();
+    }
+    
+    calculateExperience(joinDate) {
+        const now = new Date();
+        const joined = new Date(joinDate);
+        const diffInYears = (now - joined) / (365.25 * 24 * 60 * 60 * 1000);
+        return Math.max(0, Math.floor(diffInYears * 10) / 10);
+    }
+    
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    }
+    
+    updateTeamTabs() {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeTab = document.querySelector(`[data-team="${this.currentTeamFilter}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active');
+        }
+    }
+    
+    showMemberModal(member = null) {
+        this.editingMember = member;
+        const modal = document.getElementById('memberModal');
+        const title = document.getElementById('memberModalTitle');
+        const form = document.getElementById('memberForm');
+        
+        if (!modal || !title || !form) return;
+        
+        title.textContent = member ? 'Edit Team Member' : 'Add Team Member';
+        
+        if (member) {
+            document.getElementById('memberName').value = member.name;
+            document.getElementById('memberEmail').value = member.email;
+            document.getElementById('memberRole').value = member.role;
+            document.getElementById('memberTeam').value = member.team;
+            document.getElementById('memberJoinDate').value = member.joinDate;
         } else {
-            this.tasks.push(taskData);
+            form.reset();
         }
-
-        this.hideTaskModal();
-        this.populateTaskTable();
-        this.updateDashboard();
-    }
-
-    // Theme Toggle
-    initThemeToggle() {
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
         
-        if (themeToggle && themeIcon) {
-            themeToggle.addEventListener('click', () => {
-                if (document.body.dataset.colorScheme === 'dark') {
-                    document.body.dataset.colorScheme = 'light';
-                    themeIcon.textContent = '🌙';
-                    this.settings.theme = 'light';
-                } else {
-                    document.body.dataset.colorScheme = 'dark';
-                    themeIcon.textContent = '☀️';
-                    this.settings.theme = 'dark';
+        modal.classList.add('active');
+    }
+    
+    closeMemberModal() {
+        const modal = document.getElementById('memberModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        this.editingMember = null;
+    }
+    
+    saveMember() {
+        const name = document.getElementById('memberName').value;
+        const email = document.getElementById('memberEmail').value;
+        const role = document.getElementById('memberRole').value;
+        const team = document.getElementById('memberTeam').value;
+        const joinDate = document.getElementById('memberJoinDate').value;
+        
+        if (!name || !email || !role || !team || !joinDate) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
+        if (this.editingMember) {
+            // Update existing member
+            const index = this.data.teamMembers.findIndex(m => m.id === this.editingMember.id);
+            this.data.teamMembers[index] = {
+                ...this.editingMember,
+                name, email, role, team, joinDate
+            };
+            
+            this.addActivity('member_updated', `Member Updated: ${name}`, `${name} profile has been updated`);
+        } else {
+            // Add new member
+            const newMember = {
+                id: Date.now(),
+                name, email, role, team, joinDate
+            };
+            this.data.teamMembers.push(newMember);
+            
+            this.addActivity('member_added', `Member Added: ${name}`, `${name} joined the ${team} team as ${role}`);
+        }
+        
+        this.saveData();
+        this.closeMemberModal();
+        this.renderTeamMembers();
+        this.renderDashboard();
+    }
+    
+    editMember(id) {
+        const member = this.data.teamMembers.find(m => m.id === id);
+        if (member) {
+            this.showMemberModal(member);
+        }
+    }
+    
+    deleteMember(id) {
+        if (confirm('Are you sure you want to delete this team member?')) {
+            const member = this.data.teamMembers.find(m => m.id === id);
+            this.data.teamMembers = this.data.teamMembers.filter(m => m.id !== id);
+            
+            this.addActivity('member_removed', `Member Removed: ${member.name}`, `${member.name} has been removed from the team`);
+            
+            this.saveData();
+            this.renderTeamMembers();
+            this.renderDashboard();
+        }
+    }
+    
+    // Tasks
+    renderTasks() {
+        const container = document.getElementById('tasksContainer');
+        if (!container) return;
+        
+        let filteredTasks = this.data.tasks;
+        
+        // Apply filters
+        if (this.currentTaskFilters.status) {
+            filteredTasks = filteredTasks.filter(task => task.status === this.currentTaskFilters.status);
+        }
+        
+        if (this.currentTaskFilters.assignee) {
+            filteredTasks = filteredTasks.filter(task => task.assignee === this.currentTaskFilters.assignee);
+        }
+        
+        if (this.currentTaskFilters.search) {
+            const search = this.currentTaskFilters.search.toLowerCase();
+            filteredTasks = filteredTasks.filter(task => 
+                task.description.toLowerCase().includes(search) ||
+                task.jiraId.toLowerCase().includes(search) ||
+                task.assignee.toLowerCase().includes(search)
+            );
+        }
+        
+        if (filteredTasks.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <i class="lni lni-checkmark-circle" style="font-size: 3rem; color: var(--color-text-secondary); margin-bottom: 1rem;"></i>
+                    <h3>No tasks found</h3>
+                    <p>Add your first task to get started</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = filteredTasks.map(task => `
+            <div class="task-card">
+                <div class="task-header">
+                    <div class="task-id">${task.jiraId}</div>
+                    <div class="task-status ${task.status.toLowerCase().replace(' ', '-')}">${task.status}</div>
+                </div>
+                <div class="task-description">${task.description}</div>
+                <div class="task-meta">
+                    <div class="task-meta-item">
+                        <label>Assignee</label>
+                        <span>${task.assignee}</span>
+                    </div>
+                    <div class="task-meta-item">
+                        <label>Estimation</label>
+                        <span>${task.estimation}h</span>
+                    </div>
+                    <div class="task-meta-item">
+                        <label>Completion Date</label>
+                        <span>${task.completionDate ? this.formatDate(task.completionDate) : 'Not set'}</span>
+                    </div>
+                    <div class="task-meta-item">
+                        <label>Updated</label>
+                        <span>${this.formatDate(task.updatedDate)}</span>
+                    </div>
+                </div>
+                ${task.dailyComments ? `
+                    <div class="task-comments">
+                        <strong>Daily Comments:</strong> ${task.dailyComments}
+                    </div>
+                ` : ''}
+                ${task.blockers ? `
+                    <div class="task-blockers">
+                        <strong>Blockers:</strong> ${task.blockers}
+                    </div>
+                ` : ''}
+                <div class="task-actions">
+                    <button class="btn-icon btn-icon--edit" onclick="app.editTask(${task.id})" title="Edit Task">
+                        <i class="lni lni-pencil"></i>
+                    </button>
+                    <button class="btn-icon btn-icon--delete" onclick="app.deleteTask(${task.id})" title="Delete Task">
+                        <i class="lni lni-trash"></i>
+                    </button>
+                    ${task.gitLink ? `<a href="${task.gitLink}" target="_blank" class="btn-icon btn-icon--edit" title="View Git Link"><i class="lni lni-github"></i></a>` : ''}
+                    ${task.oneDriveLink ? `<a href="${task.oneDriveLink}" target="_blank" class="btn-icon btn-icon--edit" title="View OneDrive Link"><i class="lni lni-cloud"></i></a>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    updateAssigneeFilters() {
+        const assigneeFilter = document.getElementById('assigneeFilter');
+        if (assigneeFilter) {
+            const assignees = [...new Set(this.data.teamMembers.map(m => m.name))];
+            
+            assigneeFilter.innerHTML = '<option value="">All Assignees</option>' +
+                assignees.map(assignee => `<option value="${assignee}">${assignee}</option>`).join('');
+        }
+        
+        // Update task assignee dropdown
+        const taskAssignee = document.getElementById('taskAssignee');
+        if (taskAssignee) {
+            const assignees = [...new Set(this.data.teamMembers.map(m => m.name))];
+            taskAssignee.innerHTML = '<option value="">Select Assignee</option>' +
+                assignees.map(assignee => `<option value="${assignee}">${assignee}</option>`).join('');
+        }
+    }
+    
+    showTaskModal(task = null) {
+        this.editingTask = task;
+        const modal = document.getElementById('taskModal');
+        const title = document.getElementById('taskModalTitle');
+        const form = document.getElementById('taskForm');
+        
+        if (!modal || !title || !form) return;
+        
+        title.textContent = task ? 'Edit Task' : 'Add Task';
+        this.updateAssigneeFilters();
+        
+        if (task) {
+            document.getElementById('taskJiraId').value = task.jiraId;
+            document.getElementById('taskAssignee').value = task.assignee;
+            document.getElementById('taskDescription').value = task.description;
+            document.getElementById('taskEstimation').value = task.estimation;
+            document.getElementById('taskStatus').value = task.status;
+            document.getElementById('taskDailyComments').value = task.dailyComments;
+            document.getElementById('taskCompletionDate').value = task.completionDate;
+            document.getElementById('taskClarificationNeeded').checked = task.clarificationNeeded;
+            document.getElementById('taskBlockers').value = task.blockers;
+            document.getElementById('taskGitLink').value = task.gitLink;
+            document.getElementById('taskOneDriveLink').value = task.oneDriveLink;
+            document.getElementById('taskCustomerFeedback').value = task.customerFeedback;
+            document.getElementById('taskLeadComments').value = task.leadComments;
+        } else {
+            form.reset();
+        }
+        
+        modal.classList.add('active');
+    }
+    
+    closeTaskModal() {
+        const modal = document.getElementById('taskModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        this.editingTask = null;
+    }
+    
+    saveTask() {
+        const taskData = {
+            jiraId: document.getElementById('taskJiraId').value,
+            assignee: document.getElementById('taskAssignee').value,
+            description: document.getElementById('taskDescription').value,
+            estimation: parseInt(document.getElementById('taskEstimation').value) || 0,
+            status: document.getElementById('taskStatus').value,
+            dailyComments: document.getElementById('taskDailyComments').value,
+            completionDate: document.getElementById('taskCompletionDate').value,
+            clarificationNeeded: document.getElementById('taskClarificationNeeded').checked,
+            blockers: document.getElementById('taskBlockers').value,
+            gitLink: document.getElementById('taskGitLink').value,
+            oneDriveLink: document.getElementById('taskOneDriveLink').value,
+            customerFeedback: document.getElementById('taskCustomerFeedback').value,
+            leadComments: document.getElementById('taskLeadComments').value,
+            updatedDate: new Date().toISOString().split('T')[0]
+        };
+        
+        if (!taskData.description || !taskData.assignee || !taskData.status) {
+            alert('Please fill in required fields: Description, Assignee, and Status');
+            return;
+        }
+        
+        if (this.editingTask) {
+            // Update existing task
+            const index = this.data.tasks.findIndex(t => t.id === this.editingTask.id);
+            this.data.tasks[index] = {
+                ...this.editingTask,
+                ...taskData
+            };
+            
+            this.addActivity('task_updated', `Task Updated: ${taskData.jiraId}`, taskData.description);
+        } else {
+            // Add new task
+            const newTask = {
+                id: Date.now(),
+                ...taskData,
+                createdDate: new Date().toISOString().split('T')[0],
+                reopened: false
+            };
+            this.data.tasks.push(newTask);
+            
+            this.addActivity('task_created', `Task Created: ${taskData.jiraId}`, taskData.description);
+        }
+        
+        this.saveData();
+        this.closeTaskModal();
+        this.renderTasks();
+        this.renderDashboard();
+    }
+    
+    editTask(id) {
+        const task = this.data.tasks.find(t => t.id === id);
+        if (task) {
+            this.showTaskModal(task);
+        }
+    }
+    
+    deleteTask(id) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            const task = this.data.tasks.find(t => t.id === id);
+            this.data.tasks = this.data.tasks.filter(t => t.id !== id);
+            
+            this.addActivity('task_deleted', `Task Deleted: ${task.jiraId}`, task.description);
+            
+            this.saveData();
+            this.renderTasks();
+            this.renderDashboard();
+        }
+    }
+    
+    // Retrospectives
+    renderRetrospectives() {
+        const container = document.getElementById('retrospectivesContainer');
+        if (!container) return;
+        
+        if (this.data.retrospectives.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <i class="lni lni-thought" style="font-size: 3rem; color: var(--color-text-secondary); margin-bottom: 1rem;"></i>
+                    <h3>No retrospectives found</h3>
+                    <p>Add your first retrospective to get started</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.data.retrospectives.map(retro => `
+            <div class="retrospective-card">
+                <div class="retrospective-header">
+                    <h3>${retro.period}</h3>
+                    <div>
+                        <button class="btn-icon btn-icon--edit" onclick="app.editRetrospective(${retro.id})" title="Edit Retrospective">
+                            <i class="lni lni-pencil"></i>
+                        </button>
+                        <button class="btn-icon btn-icon--delete" onclick="app.deleteRetrospective(${retro.id})" title="Delete Retrospective">
+                            <i class="lni lni-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="retrospective-body">
+                    <div class="retro-section">
+                        <h4>What went well?</h4>
+                        <div class="retro-items">
+                            ${retro.whatWentWell.length > 0 ? 
+                                retro.whatWentWell.map(item => `<div class="retro-item-display">${item}</div>`).join('') :
+                                '<div class="retro-empty">No items added</div>'
+                            }
+                        </div>
+                    </div>
+                    <div class="retro-section">
+                        <h4>Areas of Improvement</h4>
+                        <div class="retro-items">
+                            ${retro.areasOfImprovement.length > 0 ? 
+                                retro.areasOfImprovement.map(item => `<div class="retro-item-display">${item}</div>`).join('') :
+                                '<div class="retro-empty">No items added</div>'
+                            }
+                        </div>
+                    </div>
+                    <div class="retro-section">
+                        <h4>Team Concerns</h4>
+                        <div class="retro-items">
+                            ${retro.teamConcerns.length > 0 ? 
+                                retro.teamConcerns.map(item => `<div class="retro-item-display">${item}</div>`).join('') :
+                                '<div class="retro-empty">No items added</div>'
+                            }
+                        </div>
+                    </div>
+                    <div class="retro-section">
+                        <h4>Major Features</h4>
+                        <div class="retro-items">
+                            ${retro.majorFeatures.length > 0 ? 
+                                retro.majorFeatures.map(item => `<div class="retro-item-display">${item}</div>`).join('') :
+                                '<div class="retro-empty">No items added</div>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    showRetrospectiveModal(retro = null) {
+        this.editingRetrospective = retro;
+        const modal = document.getElementById('retrospectiveModal');
+        const title = document.getElementById('retrospectiveModalTitle');
+        const form = document.getElementById('retrospectiveForm');
+        
+        if (!modal || !title || !form) return;
+        
+        title.textContent = retro ? 'Edit Retrospective' : 'Add Retrospective';
+        
+        if (retro) {
+            document.getElementById('retrospectivePeriod').value = retro.period;
+            this.populateRetroItems('whatWentWellContainer', retro.whatWentWell);
+            this.populateRetroItems('areasOfImprovementContainer', retro.areasOfImprovement);
+            this.populateRetroItems('teamConcernsContainer', retro.teamConcerns);
+            this.populateRetroItems('majorFeaturesContainer', retro.majorFeatures);
+        } else {
+            form.reset();
+            this.resetRetroItems();
+        }
+        
+        modal.classList.add('active');
+    }
+    
+    closeRetrospectiveModal() {
+        const modal = document.getElementById('retrospectiveModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        this.editingRetrospective = null;
+    }
+    
+    populateRetroItems(containerId, items) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        container.innerHTML = items.length > 0 ? 
+            items.map(item => `
+                <div class="retro-item">
+                    <input type="text" class="form-control" value="${item}">
+                    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                </div>
+            `).join('') :
+            `<div class="retro-item">
+                <input type="text" class="form-control" placeholder="Add item...">
+                <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+            </div>`;
+    }
+    
+    resetRetroItems() {
+        ['whatWentWellContainer', 'areasOfImprovementContainer', 'teamConcernsContainer', 'majorFeaturesContainer'].forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="retro-item">
+                        <input type="text" class="form-control" placeholder="Add item...">
+                        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+                    </div>
+                `;
+            }
+        });
+    }
+    
+    saveRetrospective() {
+        const period = document.getElementById('retrospectivePeriod').value;
+        const whatWentWell = this.getRetroItems('whatWentWellContainer');
+        const areasOfImprovement = this.getRetroItems('areasOfImprovementContainer');
+        const teamConcerns = this.getRetroItems('teamConcernsContainer');
+        const majorFeatures = this.getRetroItems('majorFeaturesContainer');
+        
+        if (!period) {
+            alert('Please enter a period for the retrospective');
+            return;
+        }
+        
+        if (this.editingRetrospective) {
+            // Update existing retrospective
+            const index = this.data.retrospectives.findIndex(r => r.id === this.editingRetrospective.id);
+            this.data.retrospectives[index] = {
+                ...this.editingRetrospective,
+                period, whatWentWell, areasOfImprovement, teamConcerns, majorFeatures
+            };
+        } else {
+            // Add new retrospective
+            const newRetrospective = {
+                id: Date.now(),
+                period, whatWentWell, areasOfImprovement, teamConcerns, majorFeatures,
+                createdDate: new Date().toISOString().split('T')[0]
+            };
+            this.data.retrospectives.push(newRetrospective);
+            
+            this.addActivity('retrospective_added', `Retrospective Added: ${period}`, 'New retrospective has been created');
+        }
+        
+        this.saveData();
+        this.closeRetrospectiveModal();
+        this.renderRetrospectives();
+    }
+    
+    getRetroItems(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return [];
+        
+        const inputs = container.querySelectorAll('input[type="text"]');
+        return Array.from(inputs)
+            .map(input => input.value.trim())
+            .filter(value => value !== '');
+    }
+    
+    editRetrospective(id) {
+        const retro = this.data.retrospectives.find(r => r.id === id);
+        if (retro) {
+            this.showRetrospectiveModal(retro);
+        }
+    }
+    
+    deleteRetrospective(id) {
+        if (confirm('Are you sure you want to delete this retrospective?')) {
+            const retro = this.data.retrospectives.find(r => r.id === id);
+            this.data.retrospectives = this.data.retrospectives.filter(r => r.id !== id);
+            
+            this.addActivity('retrospective_deleted', `Retrospective Deleted: ${retro.period}`, 'Retrospective has been removed');
+            
+            this.saveData();
+            this.renderRetrospectives();
+        }
+    }
+    
+    // Jira Integration
+    saveJiraConfig() {
+        const config = {
+            baseUrl: document.getElementById('jiraBaseUrl').value,
+            apiKey: document.getElementById('jiraApiKey').value,
+            username: document.getElementById('jiraUsername').value,
+            enabled: true
+        };
+        
+        this.data.jiraConfig = config;
+        this.saveData();
+        
+        this.showStatus('jiraStatus', 'Configuration saved successfully', 'success');
+        this.toggleJiraImport(true);
+    }
+    
+    async testJiraConnection() {
+        const config = this.data.jiraConfig;
+        
+        if (!config.baseUrl || !config.apiKey || !config.username) {
+            this.showStatus('jiraStatus', 'Please fill in all configuration fields', 'error');
+            return;
+        }
+        
+        try {
+            // Simulate API call - in real implementation, this would make an actual request
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            this.showStatus('jiraStatus', 'Connection successful! Jira integration is ready.', 'success');
+            this.toggleJiraImport(true);
+        } catch (error) {
+            this.showStatus('jiraStatus', 'Connection failed. Please check your configuration.', 'error');
+        }
+    }
+    
+    toggleJiraImport(show) {
+        const importCard = document.getElementById('jiraImportCard');
+        if (importCard) {
+            importCard.style.display = show ? 'block' : 'none';
+        }
+    }
+    
+    async importJiraTasks() {
+        const projectKey = document.getElementById('jiraProjectKey').value;
+        
+        if (!projectKey) {
+            alert('Please enter a project key');
+            return;
+        }
+        
+        try {
+            // Simulate importing tasks - in real implementation, this would call Jira API
+            const mockTasks = [
+                {
+                    id: Date.now() + 1,
+                    jiraId: `${projectKey}-101`,
+                    description: 'Implement authentication module',
+                    estimation: 32,
+                    dailyComments: 'Imported from Jira',
+                    completionDate: '2025-07-25',
+                    blockers: '',
+                    clarificationNeeded: false,
+                    gitLink: '',
+                    oneDriveLink: '',
+                    assignee: this.data.teamMembers[0]?.name || 'Unassigned',
+                    status: 'In Progress',
+                    customerFeedback: '',
+                    reopened: false,
+                    leadComments: '',
+                    createdDate: new Date().toISOString().split('T')[0],
+                    updatedDate: new Date().toISOString().split('T')[0]
+                },
+                {
+                    id: Date.now() + 2,
+                    jiraId: `${projectKey}-102`,
+                    description: 'Fix performance issues in data processing',
+                    estimation: 16,
+                    dailyComments: 'Imported from Jira',
+                    completionDate: '2025-07-22',
+                    blockers: '',
+                    clarificationNeeded: false,
+                    gitLink: '',
+                    oneDriveLink: '',
+                    assignee: this.data.teamMembers[1]?.name || 'Unassigned',
+                    status: 'Not Started',
+                    customerFeedback: '',
+                    reopened: false,
+                    leadComments: '',
+                    createdDate: new Date().toISOString().split('T')[0],
+                    updatedDate: new Date().toISOString().split('T')[0]
                 }
-            });
+            ];
+            
+            this.data.tasks.push(...mockTasks);
+            
+            this.addActivity('jira_import', `Jira Import: ${projectKey}`, `Imported ${mockTasks.length} tasks from Jira`);
+            
+            this.saveData();
+            this.renderTasks();
+            this.renderDashboard();
+            
+            alert(`Successfully imported ${mockTasks.length} tasks from Jira`);
+        } catch (error) {
+            alert('Failed to import tasks from Jira');
         }
     }
-
-    // Auto Refresh
-    startAutoRefresh() {
-        if (this.refreshTimer) {
-            clearInterval(this.refreshTimer);
+    
+    // Email Configuration
+    saveEmailConfig() {
+        const config = {
+            enabled: document.getElementById('emailEnabled').checked,
+            smtpHost: document.getElementById('smtpHost').value,
+            smtpPort: parseInt(document.getElementById('smtpPort').value),
+            username: document.getElementById('emailUsername').value,
+            password: document.getElementById('emailPassword').value,
+            fromEmail: document.getElementById('fromEmail').value
+        };
+        
+        this.data.emailConfig = config;
+        this.saveData();
+        
+        alert('Email configuration saved successfully');
+    }
+    
+    async testEmail() {
+        const config = this.data.emailConfig;
+        
+        if (!config.enabled || !config.smtpHost || !config.username) {
+            alert('Please configure email settings first');
+            return;
         }
         
-        this.refreshTimer = setInterval(() => {
-            this.updateLastRefresh();
-            this.updateDashboard();
-        }, this.settings.refreshInterval * 1000);
-    }
-
-    updateLastRefresh() {
-        const lastUpdatedEl = document.getElementById('last-updated-time');
-        if (lastUpdatedEl) {
-            const now = new Date();
-            lastUpdatedEl.textContent = now.toLocaleTimeString();
+        try {
+            // Simulate sending test email
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            alert('Test email sent successfully!');
+        } catch (error) {
+            alert('Failed to send test email. Please check your configuration.');
         }
+    }
+    
+    // Settings
+    loadSettings() {
+        const { jiraConfig, emailConfig } = this.data;
+        
+        // Load Jira settings
+        const jiraBaseUrl = document.getElementById('jiraBaseUrl');
+        const jiraApiKey = document.getElementById('jiraApiKey');
+        const jiraUsername = document.getElementById('jiraUsername');
+        
+        if (jiraBaseUrl) jiraBaseUrl.value = jiraConfig.baseUrl || '';
+        if (jiraApiKey) jiraApiKey.value = jiraConfig.apiKey || '';
+        if (jiraUsername) jiraUsername.value = jiraConfig.username || '';
+        
+        // Load Email settings
+        const emailEnabled = document.getElementById('emailEnabled');
+        const smtpHost = document.getElementById('smtpHost');
+        const smtpPort = document.getElementById('smtpPort');
+        const emailUsername = document.getElementById('emailUsername');
+        const emailPassword = document.getElementById('emailPassword');
+        const fromEmail = document.getElementById('fromEmail');
+        
+        if (emailEnabled) emailEnabled.checked = emailConfig.enabled || false;
+        if (smtpHost) smtpHost.value = emailConfig.smtpHost || '';
+        if (smtpPort) smtpPort.value = emailConfig.smtpPort || 587;
+        if (emailUsername) emailUsername.value = emailConfig.username || '';
+        if (emailPassword) emailPassword.value = emailConfig.password || '';
+        if (fromEmail) fromEmail.value = emailConfig.fromEmail || '';
+        
+        this.toggleJiraImport(jiraConfig.enabled);
+    }
+    
+    // Utility Functions
+    addActivity(type, title, description) {
+        const activity = {
+            id: Date.now() + Math.random(),
+            type,
+            title,
+            description,
+            timestamp: new Date().toISOString(),
+            user: 'Admin'
+        };
+        
+        this.data.recentActivity.unshift(activity);
+        
+        // Keep only last 50 activities
+        if (this.data.recentActivity.length > 50) {
+            this.data.recentActivity = this.data.recentActivity.slice(0, 50);
+        }
+        
+        this.saveData();
+        
+        if (this.currentSection === 'dashboard') {
+            this.renderRecentActivity();
+        }
+    }
+    
+    showStatus(containerId, message, type) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        const statusClass = type === 'success' ? 'status--success' : 'status--error';
+        
+        container.innerHTML = `
+            <div class="status ${statusClass}">
+                <i class="lni lni-${type === 'success' ? 'checkmark' : 'warning'}"></i>
+                ${message}
+            </div>
+        `;
+        
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 5000);
+    }
+    
+    closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.classList.remove('active');
+        });
+        this.editingMember = null;
+        this.editingTask = null;
+        this.editingRetrospective = null;
     }
 }
 
-// Initialize the application
-const app = new TeamTracker();
+// Global functions for retrospective management
+function addRetroItem(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const newItem = document.createElement('div');
+    newItem.className = 'retro-item';
+    newItem.innerHTML = `
+        <input type="text" class="form-control" placeholder="Add item...">
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">×</button>
+    `;
+    container.appendChild(newItem);
+}
+
+// Initialize application
+let app;
+document.addEventListener('DOMContentLoaded', () => {
+    app = new TeamTrackerApp();
+});
