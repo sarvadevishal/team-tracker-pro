@@ -20,13 +20,13 @@
                     <label for="loginEmail" class="form-label">
                         <i class="lni lni-envelope"></i> Email
                     </label>
-                    <input type="email" id="loginEmail" class="form-control" required>
+                    <input type="email" id="loginEmail" class="form-control" value="admin@company.com" required>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword" class="form-label">
                         <i class="lni lni-lock"></i> Password
                     </label>
-                    <input type="password" id="loginPassword" class="form-control" required>
+                    <input type="password" id="loginPassword" class="form-control" value="admin123" required>
                 </div>
                 <div class="form-group">
                     <label class="checkbox-label">
@@ -214,6 +214,9 @@
                         <option value="in-progress">In Progress</option>
                         <option value="done">Done</option>
                     </select>
+                    <button id="refreshTasksBtn" class="btn btn--secondary">
+                        <i class="lni lni-reload"></i> Refresh
+                    </button>
                 </div>
 
                 <div id="tasksList" class="tasks-grid">
@@ -282,28 +285,44 @@
                             <h3><i class="lni lni-jira"></i> Jira Integration</h3>
                             <form id="jiraConfigForm">
                                 <div class="form-group">
-                                    <label for="jiraBaseUrl" class="form-label">Jira Base URL</label>
+                                    <label for="jiraBaseUrl" class="form-label">
+                                        <i class="lni lni-world"></i> Jira Base URL
+                                    </label>
                                     <input type="url" id="jiraBaseUrl" class="form-control" 
                                            placeholder="https://company.atlassian.net">
                                 </div>
                                 <div class="form-group">
-                                    <label for="jiraUsername" class="form-label">Username</label>
+                                    <label for="jiraUsername" class="form-label">
+                                        <i class="lni lni-user"></i> Username
+                                    </label>
                                     <input type="text" id="jiraUsername" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label for="jiraApiKey" class="form-label">API Key</label>
+                                    <label for="jiraApiKey" class="form-label">
+                                        <i class="lni lni-key"></i> API Key
+                                    </label>
                                     <input type="password" id="jiraApiKey" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label for="jiraBoardId" class="form-label">Board ID</label>
+                                    <label for="jiraBoardId" class="form-label">
+                                        <i class="lni lni-grid"></i> Board ID
+                                    </label>
                                     <input type="text" id="jiraBoardId" class="form-control">
                                 </div>
-                                <button type="submit" class="btn btn--primary">
-                                    <i class="lni lni-save"></i> Save Configuration
-                                </button>
-                                <button type="button" id="testJiraBtn" class="btn btn--secondary">
-                                    <i class="lni lni-checkmark"></i> Test Connection
-                                </button>
+                                <div class="form-group">
+                                    <label for="jiraMaxResults" class="form-label">
+                                        <i class="lni lni-list"></i> Max Results per Request
+                                    </label>
+                                    <input type="number" id="jiraMaxResults" class="form-control" value="100" min="1" max="1000">
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn--primary">
+                                        <i class="lni lni-save"></i> Save Configuration
+                                    </button>
+                                    <button type="button" id="testJiraBtn" class="btn btn--secondary">
+                                        <i class="lni lni-checkmark"></i> Test Connection
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
